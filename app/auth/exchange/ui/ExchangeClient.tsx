@@ -12,7 +12,7 @@ export default function ExchangeClient() {
     const run = async () => {
       const supabase = supabaseBrowser();
       if (!supabase) {
-        setMsg("Missing Supabase env vars. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel.\");
+        setMsg("Missing Supabase env vars. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel.");
         return;
       }
 
