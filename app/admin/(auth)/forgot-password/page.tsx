@@ -2,24 +2,21 @@
 
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
-
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const sendReset = async () => {
-    setMsg(null);
-
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!url || !anon) {
-      return setMsg("Missing Supabase env vars. Add them in Vercel Environment Variables.");
+    const supabase = supabaseBrowser();
+    if (!supabase) {
+      setMsg?.("Missing Supabase env vars. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel.");
+      return;
     }
 
+    setMsg(null);
     setLoading(true);
 
-    const supabase = supabaseBrowser();
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${window.location.origin}/admin/reset-password`,
     });

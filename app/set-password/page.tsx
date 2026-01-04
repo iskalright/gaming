@@ -3,17 +3,19 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
+function makeSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anon) return null;
+
+  return createClient(url, anon, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
     },
-  }
-);
+  });
+}
 
 export default function SetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -24,19 +26,38 @@ export default function SetPasswordPage() {
   useEffect(() => {
     // must be logged in from invite
     (async () => {
+      const supabase = makeSupabase();
+      if (!supabase) {
+        setMsg(
+          "Missing Supabase env vars. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel."
+        );
+        return;
+      }
+
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
         const sp = new URLSearchParams(window.location.search);
         const next = sp.get("next") || "/select";
-        window.location.replace(`/login?next=${encodeURIComponent("/set-password?next=" + next)}`);
+        window.location.replace(
+          `/login?next=${encodeURIComponent("/set-password?next=" + next)}`
+        );
       }
     })();
   }, []);
 
   const onSet = async () => {
     setMsg("");
-    if (!password || password.length < 6) return setMsg("Password must be at least 6 characters.");
+    if (!password || password.length < 6)
+      return setMsg("Password must be at least 6 characters.");
     if (password !== confirm) return setMsg("Passwords do not match.");
+
+    const supabase = makeSupabase();
+    if (!supabase) {
+      setMsg(
+        "Missing Supabase env vars. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel."
+      );
+      return;
+    }
 
     setLoading(true);
     try {

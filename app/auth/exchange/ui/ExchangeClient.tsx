@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
+import { supabaseBrowser } from "@/lib/supabaseBrowser";
 export default function ExchangeClient() {
   const router = useRouter();
   const sp = useSearchParams();
@@ -16,6 +10,12 @@ export default function ExchangeClient() {
 
   useEffect(() => {
     const run = async () => {
+      const supabase = supabaseBrowser();
+      if (!supabase) {
+        setMsg(\"Missing Supabase env vars. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel.\");
+        return;
+      }
+
       const code = sp.get("code");
       const next = sp.get("next") || "/select";
 

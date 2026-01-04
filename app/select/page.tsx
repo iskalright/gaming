@@ -1,13 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
 type Game = {
   id: string;
@@ -74,6 +69,12 @@ export default function SelectPage() {
 
   // ✅ book slot (ONLY on click)
   const bookSlot = async () => {
+    const supabase = supabaseBrowser();
+    if (!supabase) {
+      setMsg?.("Missing Supabase env vars. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel.");
+      return;
+    }
+
     setMsg("");
     setSlotFullOpen(false);
 

@@ -1,13 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { useSearchParams, useRouter } from "next/navigation";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
 export default function ExitClient() {
   const sp = useSearchParams();
@@ -21,6 +16,12 @@ export default function ExitClient() {
 
   useEffect(() => {
     (async () => {
+      const supabase = supabaseBrowser();
+      if (!supabase) {
+        setError("Missing Supabase env vars. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel.");
+        return;
+      }
+
       setError("");
 
       if (!session_id || !token) {

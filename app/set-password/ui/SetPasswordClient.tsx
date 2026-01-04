@@ -2,13 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
+import { supabaseBrowser } from "@/lib/supabaseBrowser";
 export default function SetPasswordClient() {
   const router = useRouter();
   const sp = useSearchParams();
@@ -20,6 +14,12 @@ export default function SetPasswordClient() {
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
+    const supabase = supabaseBrowser();
+    if (!supabase) {
+      setMsg?.("Missing Supabase env vars. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel.");
+      return;
+    }
+
     setMsg("");
     if (p1.length < 6) return setMsg("Password must be at least 6 characters.");
     if (p1 !== p2) return setMsg("Passwords do not match.");

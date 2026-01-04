@@ -1,19 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
+import { supabaseBrowser } from "@/lib/supabaseBrowser";
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
   const sendResetLink = async () => {
+    const supabase = supabaseBrowser();
+    if (!supabase) {
+      setMsg?.("Missing Supabase env vars. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel.");
+      return;
+    }
+
     setMsg("");
     setLoading(true);
 

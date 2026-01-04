@@ -2,12 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -23,6 +18,13 @@ export default function ResetPasswordPage() {
     if (pw.length < 6) return setMsg("Password must be at least 6 characters.");
     if (pw !== pw2) return setMsg("Passwords do not match.");
 
+    let supabase;
+    try {
+      supabase = supabaseBrowser();
+    } catch (e: any) {
+      return setMsg(e?.message || "Supabase is not configured.");
+    }
+
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password: pw });
     setLoading(false);
@@ -37,9 +39,7 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#0b0b0b] text-white p-6">
       <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-6">
         <h1 className="text-2xl font-bold">Reset Password</h1>
-        <p className="text-sm text-white/60 mt-1">
-          Enter your new password.
-        </p>
+        <p className="text-sm text-white/60 mt-1">Enter your new password.</p>
 
         <div className="mt-5 space-y-3">
           <input

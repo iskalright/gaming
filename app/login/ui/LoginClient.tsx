@@ -3,13 +3,8 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { useRouter, useSearchParams } from "next/navigation";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
 export default function LoginClient() {
   const router = useRouter();
@@ -25,6 +20,12 @@ export default function LoginClient() {
   const canLogin = email.trim() && password.trim();
 
   const handleLogin = async () => {
+    const supabase = supabaseBrowser();
+    if (!supabase) {
+      setMsg?.("Missing Supabase env vars. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel.");
+      return;
+    }
+
     setMsg("");
     setLoading(true);
 
