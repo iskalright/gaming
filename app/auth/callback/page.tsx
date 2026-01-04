@@ -1,19 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true, // important
-    },
-  }
-);
+import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
 function getNextFromSearch() {
   const sp = new URLSearchParams(window.location.search);
@@ -21,7 +9,6 @@ function getNextFromSearch() {
 }
 
 function parseHashTokens() {
-  // hash looks like: #access_token=...&refresh_token=...&type=invite
   const hash = window.location.hash.startsWith("#")
     ? window.location.hash.slice(1)
     : window.location.hash;
@@ -37,17 +24,24 @@ export default function AuthCallbackPage() {
   const [msg, setMsg] = useState("Signing you in…");
 
   useEffect(() => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !anon) {
+      setMsg("Missing Supabase env vars. Add them in Vercel Environment Variables.");
+      return;
+    }
+
+    const supabase = supabaseBrowser();
+
     const run = async () => {
       const next = getNextFromSearch();
 
-      // 1) If Supabase auto-detected session from URL, great:
       const { data: s1 } = await supabase.auth.getSession();
       if (s1.session) {
         window.location.replace(next);
         return;
       }
 
-      // 2) Otherwise, manually set session from hash tokens:
       const { access_token, refresh_token } = parseHashTokens();
 
       if (!access_token || !refresh_token) {
